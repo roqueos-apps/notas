@@ -1,0 +1,643 @@
+// O visual das Notas.
+//
+// As cores do tema vêm só das variáveis do contrato do app-sdk (`--ros-text-rgb`,
+// `--ros-fill-rgb`, `--ros-line-rgb`, `--ros-surface-0-rgb`, `--ros-black-rgb`), sempre com o
+// valor de reserva do tema padrão, para o `yarn dev` ficar igual ao RoqueOS. As cores que são
+// das Notas usam o prefixo `--notas-`: o `--ros-` é do sistema, e o `app check` reprova
+// declarar um.
+
+.notas {
+  --notas-texto: rgba(var(--ros-text-rgb, 255, 255, 255), 0.95);
+  --notas-texto-2: rgba(var(--ros-text-rgb, 255, 255, 255), 0.72);
+  --notas-texto-3: rgba(var(--ros-text-rgb, 255, 255, 255), 0.62);
+  --notas-borda: rgba(var(--ros-line-rgb, 255, 255, 255), 0.08);
+  --notas-borda-2: rgba(var(--ros-line-rgb, 255, 255, 255), 0.12);
+  --notas-vidro: rgba(var(--ros-fill-rgb, 255, 255, 255), 0.1);
+  --notas-realce: rgba(var(--ros-fill-rgb, 255, 255, 255), 0.15);
+  --notas-superficie: rgba(var(--ros-surface-0-rgb, 30, 30, 30), 0.65);
+  --notas-superficie-2: rgba(var(--ros-surface-0-rgb, 30, 30, 30), 0.55);
+  --notas-fundo: rgba(var(--ros-surface-0-rgb, 30, 30, 30), 0.75);
+  // Opaco de verdade, para a lista não aparecer por trás do campo de texto transparente. O
+  // RoqueOS usava 0,98, e o título dos cartões de baixo aparecia fantasma no editor (medido no
+  // QA do yarn dev, 27/09/2026).
+  --notas-fundo-do-editor: rgb(var(--ros-surface-0-rgb, 30, 30, 30));
+  --notas-texto-no-acento: #3a2600;
+  --notas-desfoque: blur(20px);
+  --notas-raio: 10px;
+  --notas-raio-pequeno: 8px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  container: notas / inline-size;
+  color: var(--notas-texto);
+  background: var(--notas-fundo);
+  // O app não herda o box-sizing do Quasar fora do RoqueOS: declara o dele.
+  box-sizing: border-box;
+  font-family: inherit;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  // O perfil leve do RoqueOS (aparelho fraco): sem desfoque e sem a malha animada.
+  &--leve {
+    --notas-desfoque: none;
+
+    .notas__malha {
+      animation: none;
+      opacity: 0.5;
+    }
+  }
+
+  &__malha {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse 80% 60% at 50% -10%,
+        rgba(var(--notas-acento-rgb), 0.18),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 100% 80% at 30% 110%,
+        rgba(var(--notas-acento-rgb), 0.1),
+        transparent 70%
+      );
+    animation: notas-malha 20s ease-in-out infinite alternate;
+  }
+
+  &__lista {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  &__barra,
+  &__editor-topo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--notas-superficie);
+    backdrop-filter: var(--notas-desfoque);
+    -webkit-backdrop-filter: var(--notas-desfoque);
+    border-bottom: 1px solid var(--notas-borda);
+  }
+
+  &__marca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+
+    .rui-icone {
+      color: var(--notas-acento);
+    }
+  }
+
+  &__espaco {
+    flex: 1;
+  }
+
+  & &__nova {
+    color: var(--notas-texto-no-acento);
+    font-weight: 700;
+  }
+
+  &__busca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px;
+    padding: 8px 12px;
+    border-radius: var(--notas-raio);
+    background: var(--notas-vidro);
+    border: 1px solid var(--notas-borda);
+    color: var(--notas-texto-2);
+  }
+
+  &__busca-campo {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--notas-texto);
+    font: inherit;
+    font-size: 14px;
+    -webkit-appearance: none;
+    appearance: none;
+
+    &::placeholder {
+      color: var(--notas-texto-3);
+    }
+  }
+
+  &__etiquetas {
+    display: flex;
+    gap: 6px;
+    padding: 0 12px 8px;
+    overflow-x: auto;
+  }
+
+  &__etiqueta {
+    flex-shrink: 0;
+    padding: 4px 12px;
+    border: 1px solid var(--notas-borda);
+    border-radius: 14px;
+    background: var(--notas-vidro);
+    color: var(--notas-texto-2);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+
+    &.ativa {
+      background: rgba(var(--notas-acento-rgb), 0.18);
+      border-color: rgba(var(--notas-acento-rgb), 0.55);
+      color: var(--notas-acento);
+    }
+  }
+
+  &__vazio {
+    flex: 1;
+  }
+
+  &__itens {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
+
+    &--list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    &--grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      align-content: start;
+    }
+  }
+
+  // O cartão é um post-it: canto reto, e a cor da nota na borda.
+  &__cartao {
+    position: relative;
+    padding: 12px 14px;
+    border-radius: 0;
+    background: var(--notas-superficie-2);
+    border: 1px solid var(--notas-borda);
+    border-inline-start: 3px solid var(--cor-do-cartao, var(--notas-acento));
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--notas-realce);
+      border-color: rgba(var(--notas-acento-rgb), 0.4);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--notas-acento);
+      outline-offset: 2px;
+    }
+  }
+
+  &__itens--grid &__cartao {
+    border-inline-start: 1px solid var(--notas-borda);
+    border-top: 3px solid var(--cor-do-cartao, var(--notas-acento));
+    min-height: 120px;
+  }
+
+  &__cartao-topo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__cartao-titulo {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__cartao-pino,
+  &__cartao-tags {
+    color: var(--notas-acento);
+  }
+
+  &__cartao-previa {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--notas-texto-2);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__cartao-pe {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--notas-texto-3);
+  }
+
+  // --- o editor -------------------------------------------------------------------------
+  &__editor {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    background: var(--notas-fundo-do-editor);
+  }
+
+  &__titulo {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--notas-texto);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+
+    &::placeholder {
+      color: var(--notas-texto-3);
+    }
+  }
+
+  &__ferramentas {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--notas-borda);
+    background: var(--notas-superficie);
+  }
+
+  &__modos,
+  &__segmentos {
+    display: flex;
+    flex-shrink: 0;
+
+    button {
+      border: none;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+
+      &.ativo {
+        background: rgba(var(--notas-acento-rgb), 0.18);
+        color: var(--notas-acento);
+      }
+    }
+  }
+
+  &__modos {
+    gap: 2px;
+    padding: 2px;
+    border-radius: var(--notas-raio-pequeno);
+    background: var(--notas-vidro);
+
+    button {
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--notas-texto-3);
+    }
+  }
+
+  & &__ferramenta {
+    width: 30px;
+    min-height: 30px;
+    flex-shrink: 0;
+    color: var(--notas-texto-2);
+  }
+
+  & &__ferramenta--ia {
+    color: var(--notas-acento);
+  }
+
+  &__corpo {
+    position: relative;
+    flex: 1;
+    display: flex;
+    min-height: 0;
+
+    &--split {
+      .notas__texto,
+      .notas__previa {
+        width: 50%;
+      }
+
+      .notas__previa {
+        border-inline-start: 1px solid var(--notas-borda);
+      }
+    }
+  }
+
+  &__ancora-ia {
+    display: contents;
+  }
+
+  &__texto {
+    flex: 1;
+    width: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    padding: 16px;
+    background: transparent;
+    color: var(--notas-texto);
+    font-size: 14px;
+    line-height: 1.6;
+    font-family: 'SF Mono', ui-monospace, monospace;
+
+    &::placeholder {
+      color: var(--notas-texto-3);
+    }
+  }
+
+  &__previa {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+
+    :deep(h1),
+    :deep(h2),
+    :deep(h3) {
+      margin: 0.6em 0 0.3em;
+      color: var(--notas-texto);
+    }
+
+    :deep(a) {
+      color: var(--notas-acento);
+    }
+
+    :deep(code) {
+      background: var(--notas-vidro);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    :deep(pre) {
+      background: rgba(var(--ros-black-rgb, 0, 0, 0), 0.35);
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    :deep(blockquote) {
+      border-inline-start: 3px solid var(--notas-acento);
+      margin: 0.5em 0;
+      padding-inline-start: 12px;
+      color: var(--notas-texto-2);
+    }
+
+    :deep(ul),
+    :deep(ol) {
+      padding-inline-start: 1.4em;
+    }
+  }
+
+  &__editor-pe {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--notas-borda);
+    background: var(--notas-superficie);
+  }
+
+  &__tags {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 4px 3px 9px;
+    border-radius: 12px;
+    background: rgba(var(--notas-acento-rgb), 0.16);
+    color: var(--notas-acento);
+    font-size: 12px;
+
+    button {
+      display: flex;
+      border: none;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      padding: 0;
+      opacity: 0.7;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  &__tag-campo {
+    flex: 1;
+    min-width: 80px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--notas-texto);
+    font: inherit;
+    font-size: 13px;
+
+    &::placeholder {
+      color: var(--notas-texto-3);
+    }
+  }
+
+  &__acoes {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  &__exportar {
+    position: relative;
+  }
+
+  &__menu-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+  }
+
+  &__menu {
+    position: absolute;
+    bottom: 56px;
+    inset-inline-end: 12px;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    padding: 6px;
+    border-radius: var(--notas-raio);
+    background: var(--notas-superficie-2);
+    border: 1px solid var(--notas-borda-2);
+    box-shadow: 0 4px 8px rgba(var(--ros-shadow-rgb, 0, 0, 0), 0.25);
+    backdrop-filter: var(--notas-desfoque);
+    -webkit-backdrop-filter: var(--notas-desfoque);
+
+    button {
+      padding: 9px 12px;
+      border: none;
+      border-radius: var(--notas-raio-pequeno);
+      background: transparent;
+      color: var(--notas-texto);
+      font: inherit;
+      font-size: 13px;
+      text-align: start;
+      cursor: pointer;
+
+      &:hover,
+      &:focus-visible {
+        background: rgba(var(--notas-acento-rgb), 0.16);
+        color: var(--notas-acento);
+        outline: none;
+      }
+    }
+  }
+
+  // --- ajustes ---------------------------------------------------------------------------
+  &__ajustes {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &__ajuste {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &--linha {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  &__ajuste-rotulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+
+    .rui-icone {
+      color: var(--notas-texto-2);
+    }
+  }
+
+  &__segmentos {
+    gap: 6px;
+    flex-wrap: wrap;
+
+    button {
+      padding: 7px 14px;
+      border: 1px solid var(--notas-borda);
+      border-radius: var(--notas-raio-pequeno);
+      background: var(--notas-vidro);
+      color: var(--notas-texto-2);
+
+      &.ativo {
+        border-color: rgba(var(--notas-acento-rgb), 0.55);
+      }
+    }
+  }
+
+  // --- rolagem (o RoqueOS tem classes globais para isso; o app declara as dele) -------------
+  &__rolagem {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--ros-fill-rgb, 255, 255, 255), 0.2) transparent;
+  }
+
+  &__sem-rolagem {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+@keyframes notas-malha {
+  0% {
+    opacity: 0.85;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, -2%, 0) scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notas__malha {
+    animation: none;
+  }
+}
+
+// Janela estreita (celular, ou janela pequena na mesa): o botão de nova nota fica só com o
+// ícone, e o modo dividido empilha em vez de dividir ao meio. Pela largura da JANELA, e não
+// da tela: uma janela estreita num monitor largo também precisa disso.
+@container notas (max-width: 600px) {
+  .notas__nova-texto {
+    display: none;
+  }
+
+  .notas__corpo--split {
+    flex-direction: column;
+
+    .notas__texto,
+    .notas__previa {
+      width: 100%;
+      height: 50%;
+    }
+
+    .notas__previa {
+      border-inline-start: none;
+      border-top: 1px solid var(--notas-borda);
+    }
+  }
+}

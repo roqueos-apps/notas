@@ -1,0 +1,42 @@
+{
+  "id": "notes",
+  "versaoDoContrato": 1,
+  "camada": "primeira-parte",
+  "nome": {
+    "pt-BR": "Notas Autoadesivas",
+    "en-US": "Sticky Notes",
+    "es-ES": "Notas Adhesivas",
+    "fr-FR": "Notes",
+    "de-DE": "Notizen",
+    "ja-JP": "ノート",
+    "zh-CN": "便签",
+    "hi-IN": "नोट्स",
+    "ru-RU": "Заметки",
+    "ar-AR": "الملاحظات"
+  },
+  "descricao": {
+    "pt-BR": "Notas autoadesivas para sua área de trabalho",
+    "en-US": "Sticky notes for your desktop",
+    "es-ES": "Notas adhesivas para tu escritorio",
+    "fr-FR": "Notes autocollantes pour votre bureau",
+    "de-DE": "Haftnotizen für deinen Schreibtisch",
+    "ja-JP": "デスクトップに貼れる付箋メモ",
+    "zh-CN": "贴在桌面上的便签",
+    "hi-IN": "आपके डेस्कटॉप के लिए स्टिकी नोट्स",
+    "ru-RU": "Стикеры для рабочего стола",
+    "ar-AR": "ملاحظات لاصقة لسطح المكتب"
+  },
+  "icone": "sticky_note_2",
+  "cor": "#f59e0b",
+  "categoria": "productivity",
+  "janela": {
+    "largura": 900,
+    "altura": 600,
+    "minLargura": 400,
+    "minAltura": 300
+  },
+  "capacidades": ["colecoes", "ia", "arquivos", "abertura"],
+  "colecoes": ["notas"],
+  "autor": "Roque Ribeiro",
+  "licenca": "MIT"
+}
