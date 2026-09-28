@@ -1,0 +1,423 @@
+{
+  "versao": 1,
+  "app": "notes",
+  "antes": "as Notas de antes, dentro do RoqueOS, até 28/09/2026: um app do sistema, com componente e estilo próprios, textos em 10 idiomas e entrada no registro de apps do RoqueOS.",
+  "auditoria": "28/09/2026: linha a linha, 54 funcionalidades, o comportamento de antes, dentro do RoqueOS, contra o de depois (roqueos-apps/notas v0.1.0, já integrado ao sistema do RoqueOS). Onde a auditoria ficou em dúvida valem os veredictos conferidos no código do RoqueOS no mesmo dia (janela única, nome no dock, tamanho da janela, id do documento, painel de IA, dica do botão, área segura, perfil leve, tema), e os testes citados são os do repo hoje. Linhas do app são da v0.1.0; linhas do RoqueOS, do dia da saída ou dos veredictos. Pulados: #48 desfazer, que não existia antes nem depois (a barra de Markdown quebra o Ctrl+Z nativo nas duas versões), e #54 trocar a cor pelas Notas, código morto que nenhum botão do RoqueOS chamava; a cor continua trocável no post-it da mesa. Nada foi medido no iPhone real.",
+  "funcionalidades": [
+    {
+      "o_que": "Achar as Notas no Launchpad e na Loja, com nome, ícone, cor, categoria e descrição",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › o id e as capacidades são os do manifesto, e o manifesto é válido"
+      ],
+      "evidencia": "app.json:5-31 (nome e descrição nos 10 idiomas, ícone sticky_note_2, cor #f59e0b, categoria productivity) vira o registro de apps do RoqueOS, com nome, ícone, cor, categoria e descrição (veredicto G8). Os nomes são os mesmos que já apareciam no dock nos 10 idiomas (conferido por script na auditoria). O teste do app só valida o manifesto; o Launchpad e a Loja não foram medidos na tela nesta auditoria.",
+      "nota": "A descrição agora está traduzida nos 10 idiomas; antes 8 deles mostravam o texto em inglês."
+    },
+    {
+      "o_que": "Ver o nome das Notas no dock",
+      "estado": "mantida",
+      "evidencia": "O dock passou a usar o nome vindo do registro de apps do RoqueOS, com os mesmos textos que já apareciam ali nos 10 idiomas (veredicto G8). É o mecanismo que o QA \"nomes 7\" mede em produção desde a Onda 3; o rótulo das Notas no dock, em pt-BR e em ar-AR, não foi medido na tela nesta auditoria."
+    },
+    {
+      "o_que": "Abrir uma janela só de Notas",
+      "estado": "mantida",
+      "evidencia": "Janela única é o padrão do RoqueOS: só finder, browser, texteditor, roquecode e paint abrem mais de uma janela ao mesmo tempo. O sinalizador de janela única que o app antigo declarava nunca era, de fato, lido pelo sistema, então a saída dele não muda nada (veredicto G1). Sem teste no repo do app; abrir duas vezes pelo dock não foi medido na tela."
+    },
+    {
+      "o_que": "Abrir a janela no tamanho de sempre",
+      "estado": "mantida",
+      "evidencia": "app.json:32-37 declara 900×600, mínimo 400×300, e o registro de apps do RoqueOS leva isso como o tamanho declarado da janela. 900×600 é o padrão que valia antes, quando o app ainda não declarava um tamanho de janela (veredicto G8). Sem teste; a primeira abertura não foi medida na tela.",
+      "nota": "A janela agora declara também o tamanho mínimo, 400×300."
+    },
+    {
+      "o_que": "Abrir rápido, com o app pré-carregado",
+      "estado": "mantida",
+      "evidencia": "O RoqueOS continua pré-carregando as Notas na fila de apps secundários, no lugar do carregamento direto de antes (veredicto G9). Sem teste no repo do app."
+    },
+    {
+      "o_que": "Ver a marca Notas na barra de cima",
+      "estado": "mantida",
+      "testes": [
+        "test/troca-de-idioma.spec.js › vale o último idioma pedido, mesmo que a resposta dele chegue antes"
+      ],
+      "evidencia": "App: src/Notas.vue:8-11. O teste lê o rótulo da marca a cada troca de idioma."
+    },
+    {
+      "o_que": "Botão Nova nota, só com o ícone em janela estreita",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › criar abre o editor na hora e grava a nota com os campos do post-it"
+      ],
+      "evidencia": "App: src/Notas.vue:19-28 e src/notas.scss:624-627: até 600 px o texto some e fica o ícone, com o rótulo no aria-label. O teste acha o botão pelo rótulo e cria; a janela estreita não tem teste."
+    },
+    {
+      "o_que": "Criar uma nota",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › criar abre o editor na hora e grava a nota com os campos do post-it",
+        "test/notas.spec.js › tem os campos do post-it, e a posição em escada"
+      ],
+      "evidencia": "App: src/useNotas.js:133-145 abre o editor e só depois manda criar; antes, dentro do RoqueOS, o editor só abria depois que a gravação no banco terminava. A falha da criação vai para o aviso de erro (src/useNotas.js:59-66), sem teste.",
+      "nota": "O editor abre na hora, antes de o banco confirmar, e funciona sem rede. Se a criação falhar, aparece o aviso de erro e o editor fica aberto com uma nota que não chegou ao banco."
+    },
+    {
+      "o_que": "A nota criada aqui aparece como post-it na mesa, com cor, posição e tamanho",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › criar abre o editor na hora e grava a nota com os campos do post-it"
+      ],
+      "evidencia": "O teste confere a lista exata de campos gravados (title, content, color, x, y, width, height, zIndex, showOnDesktop, pinned, tags) e o carimbo de criação; createdAt e updatedAt são carimbos do servidor, aplicados pelo RoqueOS ao gravar. O campo id deixou de ser gravado dentro do documento, sem efeito: o post-it da área de trabalho monta a nota pelo id do documento, e as Notas leem esse mesmo id. Criar pelas Notas, arrastar o post-it e recarregar não foi medido na tela."
+    },
+    {
+      "o_que": "Editar, fixar ou mostrar na mesa grava a nota sem desfazer o post-it",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › digitar grava só o título e o texto, depois da pausa, e não desfaz o post-it arrastado",
+        "test/app.spec.js › fixar, etiquetar e esconder da mesa gravam cada um só o seu campo"
+      ],
+      "evidencia": "App: src/useNotas.js:157, 172, 180, 187 e 195 mandam só o campo mexido; o RoqueOS grava só os campos que chegam e carimba updatedAt em todo atualizar. Antes, dentro do RoqueOS, gravava a nota inteira, com posição, tamanho e camada velhos. O teste do texto prova que o post-it arrastado durante a edição fica onde a pessoa pôs; a nota subir na ordem depois de fixar não tem teste.",
+      "nota": "Cada ação grava só o seu campo, o que acaba com o arraste do post-it sendo desfeito pelas Notas. Fixar e mostrar ou esconder na mesa agora também mudam updatedAt (antes não mudavam): a nota sobe na ordem Modificação e a data do cartão muda. Nada se perde."
+    },
+    {
+      "o_que": "Ver título, texto, cor, fixação, etiquetas e datas de cada nota, inclusive dos post-its antigos",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › lista as notas da conta, com o post-it antigo sem pinned e sem tags",
+        "test/notas.spec.js › fixadas primeiro, depois a ordem escolhida; sem data vai para o fim"
+      ],
+      "evidencia": "O RoqueOS entrega as datas em ms (criadoEm, atualizadoEm), com hora estimada para a nota que ainda não chegou ao servidor; app: src/notas.js:28 e 81-86. O teste semeia um post-it antigo, sem pinned e sem tags, e ele aparece na lista."
+    },
+    {
+      "o_que": "Ver a lista atualizada na hora, em todos os aparelhos",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › lista as notas da conta, com o post-it antigo sem pinned e sem tags",
+        "test/app.spec.js › a nota aberta acompanha o que mudou em outro lugar, menos o que a pessoa digita"
+      ],
+      "evidencia": "O RoqueOS assina a mesma coleção que já guardava os post-its antes; app: src/useNotas.js:84-106. Os testes usam o sistema falso do SDK; a sincronização entre dois aparelhos reais não foi medida nesta auditoria."
+    },
+    {
+      "o_que": "A nota aberta acompanha o que mudou em outro lugar, sem perder o que se digita",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › a nota aberta acompanha o que mudou em outro lugar, menos o que a pessoa digita"
+      ],
+      "evidencia": "App: src/useNotas.js:88-99. O teste muda a nota de fora com o texto digitado ainda na tela: a fixação chega e o texto digitado fica. A cor e a mesa são copiadas no mesmo trecho, mas o teste não as confere.",
+      "nota": "Agora acompanha também as etiquetas."
+    },
+    {
+      "o_que": "Buscar no título e no texto, sem diferenciar maiúsculas",
+      "estado": "mantida",
+      "testes": ["test/notas.spec.js › a busca olha título e texto, sem caixa; a etiqueta filtra"],
+      "evidencia": "App: src/notas.js:74-79 e o campo em src/Notas.vue:31-40. Só a lógica tem teste; a ligação do campo com a lista, não."
+    },
+    {
+      "o_que": "Filtrar por etiqueta",
+      "estado": "mantida",
+      "testes": [
+        "test/notas.spec.js › a busca olha título e texto, sem caixa; a etiqueta filtra",
+        "test/notas.spec.js › as etiquetas de todas as notas, sem repetir e em ordem",
+        "test/app.spec.js › lista as notas da conta, com o post-it antigo sem pinned e sem tags"
+      ],
+      "evidencia": "App: src/Notas.vue:42-61 e src/notas.js:62-66 e 80. O teste de tela confere que o chip #casa aparece; o clique no chip, que liga e desliga o filtro, não tem teste."
+    },
+    {
+      "o_que": "Notas fixadas sempre no topo",
+      "estado": "mantida",
+      "testes": [
+        "test/notas.spec.js › fixadas primeiro, depois a ordem escolhida; sem data vai para o fim",
+        "test/app.spec.js › lista as notas da conta, com o post-it antigo sem pinned e sem tags"
+      ],
+      "evidencia": "App: src/notas.js:83, como já era antes, dentro do RoqueOS."
+    },
+    {
+      "o_que": "Ordenar por modificação, criação ou título",
+      "estado": "mantida",
+      "testes": [
+        "test/notas.spec.js › fixadas primeiro, depois a ordem escolhida; sem data vai para o fim",
+        "test/app.spec.js › as preferências vêm do armazenamento do app, e a troca de visualização grava"
+      ],
+      "evidencia": "App: src/Notas.vue:249-264 e src/notas.js:27-28 e 81-86. O teste de tela abre com a ordem por título gravada e confere a lista; o clique nos botões de ordem não tem teste. Os ajustes abrem numa folha, o RosFolha do kit ui v0.6.0, que fecha arrastando a alça para baixo como a folha do RoqueOS já fazia antes (teste do repo ui, test/componentes.spec.js, \"arrastar a alça para baixo fecha; o arraste curto volta a folha ao lugar\"; veredicto G7)."
+    },
+    {
+      "o_que": "Ver em lista ou em grade",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › as preferências vêm do armazenamento do app, e a troca de visualização grava"
+      ],
+      "evidencia": "App: src/Notas.vue:13-17, 265-280 e 359-361, e src/notas.scss:177-194. O teste clica o botão do topo e confere que a grade aparece e fica gravada; os botões da folha de ajustes não têm teste."
+    },
+    {
+      "o_que": "Cartão da nota com cor, título, pino, prévia, data e etiquetas",
+      "estado": "mantida",
+      "testes": [
+        "test/notas.spec.js › a prévia tira os sinais do Markdown e corta em cem",
+        "test/notas.spec.js › a data: hora hoje, dia da semana nesta semana, dia e mês antes disso",
+        "test/app.spec.js › lista as notas da conta, com o post-it antigo sem pinned e sem tags"
+      ],
+      "evidencia": "App: src/Notas.vue:80-103 e src/notas.js:91-111; a prévia corta com texto.length > 100, igual a antes, dentro do RoqueOS. Ficaram sem teste o limite exato de 100 caracteres (o teste usa 120; o de antes testava 100 e 101) e o \"#tag +N\"."
+    },
+    {
+      "o_que": "Tela de nenhuma nota, com o botão de criar",
+      "estado": "mudou",
+      "evidencia": "App: src/Notas.vue:63-73 e src/useNotas.js:52: RosVazio com \"Nenhuma nota encontrada\" e o botão Nova Nota. Antes, dentro do RoqueOS, mostrava também um subtítulo. Sem teste; o de antes tinha \"shows the empty state when there are no notes\".",
+      "nota": "Saiu o subtítulo, que repetia \"Nova Nota\", o texto do botão logo abaixo. O botão continua."
+    },
+    {
+      "o_que": "Abrir a nota pelo cartão",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › digitar grava só o título e o texto, depois da pausa, e não desfaz o post-it arrastado",
+        "test/app.spec.js › excluir pergunta antes, e só apaga no confirmar"
+      ],
+      "evidencia": "App: src/Notas.vue:80-89 e src/useNotas.js:124-131. Os testes abrem a nota clicando o cartão.",
+      "nota": "Agora abre também pelo teclado, com Enter ou Espaço no cartão."
+    },
+    {
+      "o_que": "Voltar para a lista, gravando a nota",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › a IA é o painel do sistema, dentro da âncora do editor, e o resultado entra na nota"
+      ],
+      "evidencia": "App: src/Notas.vue:110 e src/useNotas.js:160-165: fechar chama salvarAgora antes de fechar, como já era antes, dentro do RoqueOS. O teste só confere que Voltar fecha o painel de IA; a gravação ao voltar não tem teste."
+    },
+    {
+      "o_que": "Título gravado sozinho meio segundo depois de parar de digitar",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › digitar grava só o título e o texto, depois da pausa, e não desfaz o post-it arrastado"
+      ],
+      "evidencia": "App: src/Notas.vue:111-117 e src/useNotas.js:147-158, ESPERA_DO_TEXTO_MS = 500, a mesma espera de antes, dentro do RoqueOS. O teste avança os 500 ms e confere a gravação."
+    },
+    {
+      "o_que": "Texto gravado sozinho ao parar de digitar",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › digitar grava só o título e o texto, depois da pausa, e não desfaz o post-it arrastado",
+        "test/app.spec.js › desmontar grava o texto da última pausa e solta todos os ouvintes"
+      ],
+      "evidencia": "App: src/Notas.vue:168-176, com a mesma espera do título.",
+      "nota": "Fechar a janela no meio da espera agora grava o texto; antes a espera era cancelada e o texto dos últimos 500 ms se perdia."
+    },
+    {
+      "o_que": "Fixar ou desafixar a nota no editor",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › fixar, etiquetar e esconder da mesa gravam cada um só o seu campo",
+        "test/app.spec.js › a nota aberta acompanha o que mudou em outro lugar, menos o que a pessoa digita"
+      ],
+      "evidencia": "App: src/Notas.vue:118-124 e src/useNotas.js:167-173. O teste confere que grava só { pinned: true } e que o botão mostra aria-pressed.",
+      "nota": "Fixar agora muda também updatedAt, e a nota sobe na ordem Modificação."
+    },
+    {
+      "o_que": "Excluir a nota, com confirmação",
+      "estado": "mudou",
+      "testes": ["test/app.spec.js › excluir pergunta antes, e só apaga no confirmar"],
+      "evidencia": "App: src/Notas.vue:125 e 295-304, src/useNotas.js:203-214. O teste confere a pergunta, que nada é apagado antes do confirmar, e o aviso \"Nota excluída\". A falha ao apagar não tem teste.",
+      "nota": "O editor fecha antes de o banco confirmar. O aviso agora diz \"Nota excluída\"; antes repetia a própria pergunta de confirmação. Se a exclusão falhar, aparece o aviso de erro, com o editor já fechado. Nada se perde."
+    },
+    {
+      "o_que": "Alternar entre editar, dividido e visualizar",
+      "estado": "mantida",
+      "evidencia": "App: src/Notas.vue:128-139 e 163, src/notas.scss:346-362, os mesmos três modos de antes, dentro do RoqueOS. Sem teste, antes e depois; conferido só no código, não medido na tela."
+    },
+    {
+      "o_que": "Barra de Markdown: negrito, itálico, título, lista, tarefas, código, link e citação",
+      "estado": "mantida",
+      "testes": ["test/notas.spec.js › marca o trecho selecionado e devolve a seleção nele"],
+      "evidencia": "App: src/Notas.vue:141-151, 339-348 e 379-399, e src/notas.js:163-169: os mesmos oito formatos, escondidos no modo Visualizar. Só a função que marca o trecho tem teste; os botões e o pedido do endereço do link, não.",
+      "nota": "As dicas dos botões agora estão nos 10 idiomas; antes eram fixas em inglês."
+    },
+    {
+      "o_que": "Ver o Markdown formatado, sem código perigoso",
+      "estado": "mantida",
+      "testes": [
+        "test/markdown.spec.js › quebra de linha vira <br>, e o GFM vale (lista de tarefas)",
+        "test/markdown.spec.js › script, handler e link javascript: não passam",
+        "test/markdown.spec.js › não mexe na configuração global do marked, que no RoqueOS é a do sistema",
+        "test/markdown.spec.js › vazio é vazio"
+      ],
+      "evidencia": "App: src/markdown.js:9-19: marked com breaks e GFM, limpo pelo DOMPurify, como antes, dentro do RoqueOS, agora numa instância própria do marked."
+    },
+    {
+      "o_que": "Adicionar e remover etiquetas no editor",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › fixar, etiquetar e esconder da mesa gravam cada um só o seu campo",
+        "test/notas.spec.js › minúsculas, hífen no lugar do espaço, vazia vira vazio"
+      ],
+      "evidencia": "App: src/Notas.vue:186-201, src/useNotas.js:175-188 e src/notas.js:114-119: Enter adiciona em minúsculas, com hífen no lugar do espaço. Ficaram sem teste remover pelo X e não repetir a mesma etiqueta (useNotas.js:178)."
+    },
+    {
+      "o_que": "Mostrar ou esconder a nota na mesa, com aviso",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › fixar, etiquetar e esconder da mesa gravam cada um só o seu campo"
+      ],
+      "evidencia": "App: src/Notas.vue:203-213 e src/useNotas.js:190-201. O teste confere a gravação de { showOnDesktop: false } e o aviso \"Escondido do Desktop\".",
+      "nota": "O aviso agora sai antes de a gravação confirmar, e a ação muda updatedAt."
+    },
+    {
+      "o_que": "Abrir e fechar o menu de exportar",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › salvar em Arquivos entrega o Markdown ao sistema, na pasta Documentos"
+      ],
+      "evidencia": "App: src/Notas.vue:214-236 e src/notas.scss:495-538: o fundo que fecha o menu cobre o app e ouve o Esc. O teste abre o menu e usa um item; fechar por clique fora e por Esc não tem teste.",
+      "nota": "Fecha com clique em qualquer lugar do app e com Esc. Antes o fundo que fechava o menu cobria só o botão."
+    },
+    {
+      "o_que": "Baixar a nota em .md ou .txt",
+      "estado": "mantida",
+      "testes": [
+        "test/notas.spec.js › Markdown com o título como #, e nome de arquivo seguro",
+        "test/notas.spec.js › texto sem os sinais do Markdown, e sem título usa o do idioma"
+      ],
+      "evidencia": "App: src/useNotas.js:217-228 e src/notas.js:146-157. Os testes cobrem o conteúdo e o nome seguro do arquivo; o download em si (Blob e link) e o aviso \"Nota exportada\" ficaram sem teste (antes havia \"exportNote builds a blob download\")."
+    },
+    {
+      "o_que": "Salvar a nota em Arquivos, na pasta Documentos",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › salvar em Arquivos entrega o Markdown ao sistema, na pasta Documentos"
+      ],
+      "evidencia": "O app não manda a pasta; o conferirArquivo do app-sdk completa Documentos (app-sdk/src/arquivos.js), e o RoqueOS usa esse conferirArquivo para enviar o arquivo para dentro de /Documentos, o mesmo caminho de antes. O envio de verdade ao Storage não foi medido nesta auditoria.",
+      "nota": "O aviso agora diz \"Nota salva em Documentos\"."
+    },
+    {
+      "o_que": "Melhorar o texto com IA pelo painel do sistema",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › a IA é o painel do sistema, dentro da âncora do editor, e o resultado entra na nota"
+      ],
+      "evidencia": "O app entrega uma âncora vazia no corpo do editor (src/Notas.vue:163-167), e o RoqueOS desenha ali o painel de IA compartilhado, no corpo como antes, onde o celular não corta. O ai-panel-qa das Notas passou 4 de 4 em Chromium e WebKit nesta saída; o iPhone real não foi medido."
+    },
+    {
+      "o_que": "Saber que a IA ainda está trabalhando",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › o resultado da IA que chega depois de trocar de nota não escreve na nota nova"
+      ],
+      "evidencia": "App: src/Notas.vue:152-160 só mostra o botão ligado ou desligado; antes, dentro do RoqueOS, o botão se desligava e fazia pulsar durante a execução. O teste confere que fechar o painel pelo botão não perde o resultado e que o resultado atrasado não escreve na nota nova. O agente rodando dentro do painel é do RoqueOS, conferido no código pelo veredicto e não medido na tela.",
+      "nota": "O botão da IA não mostra mais que está ocupado nem bloqueia: quem mostra o agente rodando é o painel. Fechar o painel pelo botão não perde o resultado, que entra na mesma nota. O resultado que chega depois de trocar de nota não escreve mais na nota nova (defeito que existia antes também, consertado em 28/09)."
+    },
+    {
+      "o_que": "Escolher o agente, abrir Agentes e ver o erro da IA sem perder a nota",
+      "estado": "mantida",
+      "evidencia": "O painel de IA do RoqueOS recarrega a lista de agentes a cada abertura, e \"Abrir Agentes\" fecha o painel e abre o app Agentes; o resultado só é aplicado quando o agente termina bem, então a falha avisa e não apaga a nota. O erro vira aviso do sistema com o nome do app e o título \"Erro\", confirmado por teste do RoqueOS (veredicto G4). Antes o título era \"Erro ao processar com IA\"; o fluxo não foi medido na tela nesta auditoria."
+    },
+    {
+      "o_que": "Escolher se as notas novas aparecem na mesa",
+      "estado": "mantida",
+      "testes": ["test/notas.spec.js › tem os campos do post-it, e a posição em escada"],
+      "evidencia": "App: src/Notas.vue:281-291 e src/useNotas.js:139 e 271-274. O teste cobre só a lógica (a nota nova leva o valor do ajuste); o interruptor da folha não tem teste."
+    },
+    {
+      "o_que": "Ajustes guardados entre sessões, inclusive os de antes da saída",
+      "estado": "mantida",
+      "testes": [
+        "test/notas.spec.js › sem nada gravado, as de sempre",
+        "test/notas.spec.js › lê o formato que o RoqueOS gravava, e ignora valor estranho",
+        "test/notas.spec.js › grava e lê de volta",
+        "test/app.spec.js › as preferências vêm do armazenamento do app, e a troca de visualização grava"
+      ],
+      "evidencia": "App: src/notas.js:30-59 lê e grava em roqueos:notes:preferencias. Na primeira abertura o RoqueOS copia a chave antiga ros_notes_settings para lá, sem sobrescrever nem apagar; essa cópia é código do RoqueOS e não tem teste no repo do app."
+    },
+    {
+      "o_que": "Abrir a nota pelo post-it da mesa (Abrir em Notas)",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › aberta pelo post-it vai direto na nota, e o próximo post-it troca a nota aberta"
+      ],
+      "evidencia": "O \"Abrir em Notas\" do post-it da área de trabalho abre a janela das Notas já com a nota escolhida, entregue pela capacidade abertura do contrato do app-sdk; app: src/useNotas.js:74-82 e 112-121. Não medido na tela: clicar de novo no mesmo post-it depois de fechar o editor.",
+      "nota": "Com a janela já aberta, o próximo post-it troca a nota aberta; antes o pedido era ignorado. O título da janela aberta pelo post-it vem no idioma de quem usa."
+    },
+    {
+      "o_que": "Usar as Notas sem estar na conta",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › convidado: criar não finge, avisa que precisa de conta",
+        "test/app.spec.js › a lista segue a conta: sair esvazia sem o app refazer nada"
+      ],
+      "evidencia": "App: src/useNotas.js:58 e 133-137; a lista, do lado do RoqueOS, acompanha entrar e sair da conta. Antes, dentro do RoqueOS, o botão não fazia nada sem conta.",
+      "nota": "Criar sem conta agora avisa \"Entre na sua conta para guardar notas.\" (antes o botão não fazia nada), e a lista acompanha entrar e sair da conta com o app aberto."
+    },
+    {
+      "o_que": "Ver aviso quando algo falha",
+      "estado": "mudou",
+      "evidencia": "App: src/useNotas.js:59-66 e 102-105: falha ao gravar e falha da assinatura viram aviso de erro; sem conta vira o aviso de entrar. Antes, dentro do RoqueOS, só a criação e a exclusão avisavam, e o erro ao gravar a edição ia só para o console. Sem teste do aviso de erro; não medido na tela.",
+      "nota": "Erro ao gravar a edição e erro da assinatura da lista agora aparecem para a pessoa; antes iam só para o console."
+    },
+    {
+      "o_que": "Avisos com o nome do app, pelo tempo de ler",
+      "estado": "mudou",
+      "evidencia": "O sistema de avisos do RoqueOS põe o nome do app pelo registro de apps, medido em produção com as Notas mostrando \"Notas Autoadesivas\" (veredicto G3). A duração é o padrão do sistema de avisos do RoqueOS, 5000 ms (veredicto G2); antes, dentro do RoqueOS, usava 3000 ms, 2500 ao exportar e 4000 no erro da IA.",
+      "nota": "A linha de cima do aviso diz \"Notas Autoadesivas\", o nome do app no registro e no idioma de quem usa; antes dizia \"Notas\". O aviso fica 5 segundos, mais tempo que antes; nenhum some antes da hora."
+    },
+    {
+      "o_que": "Usar em 10 idiomas, trocando ao vivo",
+      "estado": "mantida",
+      "testes": [
+        "test/troca-de-idioma.spec.js › vale o último idioma pedido, mesmo que a resposta dele chegue antes",
+        "test/notas.spec.js › a data: hora hoje, dia da semana nesta semana, dia e mês antes disso"
+      ],
+      "evidencia": "App: src/index.js:37-55, src/textos.js:16-52 e i18n/*.json. Os textos batem 1:1 com as chaves notes.* de antes nos 10 idiomas (conferido por script na auditoria). O teste de troca garante que vale o último idioma pedido."
+    },
+    {
+      "o_que": "Usar com teclado e leitor de tela",
+      "estado": "mudou",
+      "testes": [
+        "test/app.spec.js › fixar, etiquetar e esconder da mesa gravam cada um só o seu campo",
+        "test/app.spec.js › a nota aberta acompanha o que mudou em outro lugar, menos o que a pessoa digita",
+        "test/app.spec.js › excluir pergunta antes, e só apaga no confirmar"
+      ],
+      "evidencia": "App: src/Notas.vue:37, 46, 85-89, 115, 129-135, 174, 190, 198 e 228, e src/notas.scss:212-215 e 615-619. Os testes acham os botões pelo aria-label, conferem o aria-pressed do Fixar e o alertdialog da exclusão; o foco pelo teclado e o role=menu não têm teste, e nada foi medido com leitor de tela.",
+      "nota": "Melhorou: cartão com foco e Enter ou Espaço, aria-pressed nos botões que ligam e desligam, aria-label nos campos e botões, role=menu no exportar, alertdialog na exclusão, focus-visible e prefers-reduced-motion. Antes as dicas da barra eram fixas em inglês e o cartão não abria pelo teclado."
+    },
+    {
+      "o_que": "Ver a dica ao passar o mouse nos botões",
+      "estado": "mantida",
+      "evidencia": "Os botões são RosBotao do kit ui, que põe title igual ao rotulo (ui/src/RosBotao.vue:11, veredicto G10), e os rótulos vêm traduzidos. Sem teste no repo do app; não medido passando o mouse."
+    },
+    {
+      "o_que": "Enter adiciona a etiqueta",
+      "estado": "mantida",
+      "testes": [
+        "test/app.spec.js › fixar, etiquetar e esconder da mesa gravam cada um só o seu campo"
+      ],
+      "evidencia": "App: src/Notas.vue:199. Nunca houve atalhos como Ctrl ou Cmd+B, antes nem depois.",
+      "nota": "Ganhou Enter ou Espaço no cartão e Esc no menu de exportar."
+    },
+    {
+      "o_que": "Usar no celular e em janela estreita",
+      "estado": "mudou",
+      "evidencia": "App: src/notas.scss:624-643, @container notas (max-width: 600px); antes, dentro do RoqueOS, usava a largura da tela toda como critério. Sem teste; não medido no celular.",
+      "nota": "A regra vale pela largura da janela, e não mais pela da tela: uma janela estreita num monitor largo também ganha o botão só com ícone e o modo Dividido empilhado."
+    },
+    {
+      "o_que": "Rodapé acima da barra de gestos do iPhone",
+      "estado": "mantida",
+      "testes": [
+        "test/estilo.spec.js › a margem de baixo do celular usa a do RoqueOS, com o env() só de reserva"
+      ],
+      "evidencia": "O app voltou a usar var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)), como antes, dentro do RoqueOS, e o teste reprova o env() sozinho (veredicto G6). A v0.1.0 tinha só o env(); o conserto é de 28/09. Não medido no iPhone."
+    },
+    {
+      "o_que": "Visual leve em aparelho fraco",
+      "estado": "mudou",
+      "evidencia": "App: src/index.js:30, src/Notas.vue:2 e src/notas.scss:47-55 leem sistema.desempenho.modoLeve() uma vez, ao abrir; antes, dentro do RoqueOS, reagia na hora a uma mudança do sistema (veredicto G5). Sem teste; não medido em aparelho fraco.",
+      "nota": "O visual leve continua (malha parada, sem desfoque), mas ligar ou desligar o perfil leve em Ajustes com as Notas abertas só vale ao reabrir: o contrato 0.2 e 0.3 do SDK não tem desempenho.aoMudar, registrado para a 0.4.0. O desfoque não segue mais uma variável interna do RoqueOS que existia antes."
+    },
+    {
+      "o_que": "Cores seguindo o tema do sistema",
+      "estado": "mudou",
+      "evidencia": "App: src/notas.scss:9-27: as cores vêm das variáveis do contrato (--ros-text-rgb, --ros-fill-rgb, --ros-line-rgb, --ros-surface-0-rgb) com reserva do tema padrão escuro; antes, dentro do RoqueOS, usava tokens e variáveis internas próprias das Notas, fora do contrato. Sem teste; não medido no tema claro nem nos outros temas.",
+      "nota": "As cores seguem as variáveis do contrato do app-sdk. Um tema que mirava as variáveis internas de antes, específicas das Notas, perde efeito, e o editor agora é opaco."
+    },
+    {
+      "o_que": "QA automatizado abre as Notas com notas semeadas",
+      "estado": "mantida",
+      "evidencia": "No modo E2E, o RoqueOS injeta a coleção de notas de teste por uma variável interna, do mesmo jeito de antes. Interno, só para QA; sem teste no repo do app."
+    }
+  ]
+}

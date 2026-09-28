@@ -279,6 +279,40 @@ describe('as Notas pelo app-sdk', () => {
     montagem.desmontar()
   })
 
+  it('o resultado da IA que chega depois de trocar de nota não escreve na nota nova', async () => {
+    const { el, montagem, q, botao, sistema, mudarAbertura, gravacoes } = montar({
+      semear: [postIt('n1'), postIt('n2')],
+    })
+    // O agente pode terminar com o painel fechado: o `aplicar` guardado é o que o sistema chama.
+    const pedidos = []
+    const abrirPainel = sistema.ia.abrirPainel
+    sistema.ia.abrirPainel = (pedido) => (pedidos.push(pedido), abrirPainel(pedido))
+    await vi.waitFor(() => expect(el.querySelectorAll('.notas__cartao')).toHaveLength(2))
+    const cartao = (id) =>
+      [...el.querySelectorAll('.notas__cartao')].find((c) => c.textContent.includes(`Título ${id}`))
+    cartao('n1').click()
+    await flushPromises()
+    botao('Melhorar com IA').click()
+    await flushPromises()
+    // Fechar o painel pelo mesmo botão, com a mesma nota aberta: o resultado ainda entra nela.
+    botao('Melhorar com IA').click()
+    await flushPromises()
+    pedidos[0].aplicar('Melhor n1')
+    await flushPromises()
+    expect(q('.notas__texto').value).toBe('Melhor n1')
+    // O post-it pede a n2 enquanto o agente da n1 ainda roda.
+    botao('Melhorar com IA').click()
+    await flushPromises()
+    mudarAbertura({ nota: 'n2' })
+    await vi.waitFor(() => expect(q('.notas__titulo')?.value).toBe('Título n2'))
+    const antes = gravacoes.length
+    pedidos[1].aplicar('Resultado da n1')
+    await flushPromises()
+    expect(q('.notas__texto').value).toBe('Texto n2')
+    expect(gravacoes.slice(antes).filter(([, id]) => id === 'n2')).toEqual([])
+    montagem.desmontar()
+  })
+
   it('salvar em Arquivos entrega o Markdown ao sistema, na pasta Documentos', async () => {
     const { el, montagem, q, botao, registro } = montar({ semear: [postIt('n1')] })
     await vi.waitFor(() => expect(el.querySelector('.notas__cartao')).not.toBeNull())

@@ -242,12 +242,16 @@ export function criarNotas({ sistema, t }) {
   // --- IA: o painel é do sistema ------------------------------------------------------------
   function abrirIa(ancora) {
     if (!editando.value) return
+    // O resultado é da nota que foi para a IA. O agente pode terminar com o painel já fechado
+    // (a pessoa fechou pelo botão, ou abriu outra nota pelo post-it); se a nota aberta for
+    // outra, o texto dela não é trocado pelo resultado da primeira.
+    const daNota = editando.value.id
     painel = sistema.ia.abrirPainel({
       ancora,
       tipo: 'text',
       contexto: () => editando.value?.content ?? '',
       aplicar: (texto) => {
-        if (!editando.value) return
+        if (editando.value?.id !== daNota) return
         editando.value.content = texto
         salvarAgora()
       },
