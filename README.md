@@ -8,6 +8,8 @@ do RoqueOS.
 
 Use de graça em [roqueos.com.br](https://roqueos.com.br), no computador, no celular e na TV.
 
+![As Notas do RoqueOS: uma nota em Markdown no modo dividido, o texto à esquerda e o resultado à direita](docs/capa.jpg)
+
 _English below._
 
 ## Por que existe como repo
