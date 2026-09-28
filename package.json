@@ -36,8 +36,8 @@
     "verificar": "yarn lint && yarn format:check && yarn test && yarn app:check"
   },
   "dependencies": {
-    "@roqueos-apps/app-sdk": "github:roqueos-apps/app-sdk#644ba21",
-    "@roqueos-apps/ui": "git+ssh://git@github.com/roqueos-apps/ui.git#c38a583",
+    "@roqueos-apps/app-sdk": "github:roqueos-apps/app-sdk#v0.2.0",
+    "@roqueos-apps/ui": "git+ssh://git@github.com/roqueos-apps/ui.git#v0.1.0",
     "dompurify": "3.3.1",
     "marked": "17.0.1"
   },
