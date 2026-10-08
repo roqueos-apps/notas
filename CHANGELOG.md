@@ -5,6 +5,15 @@ usa [versionamento semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.1.2] - 2026-10-08
+
+### Segurança
+
+- `dompurify` 3.3.1 → 3.4.16, a mesma versão exata do RoqueOS. A 3.3.1 tem os advisories de
+  mutation-XSS, `ADD_ATTR`/`ADD_TAGS` e `SAFE_FOR_TEMPLATES` corrigidos entre a 3.3.2 e a 3.4.16
+  (`yarn audit` do RoqueOS em 08/10/2026). O `markdownSeguro` não muda de contrato.
+- `vue` de desenvolvimento 3.5.29 → 3.5.43 (`@vue/server-renderer` < 3.5.42, XSS).
+
 ### Mudado
 
 - O kit de interface (`@roqueos-apps/ui`) entra por HTTPS (`github:roqueos-apps/ui#v0.6.0`), no
