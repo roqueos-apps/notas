@@ -1,6 +1,6 @@
 {
   "name": "@roqueos-apps/notas",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "As Notas do RoqueOS: Markdown, etiquetas, fixar, os post-its da área de trabalho e IA sobre o texto, nos dez idiomas do sistema.",
   "license": "MIT",
@@ -39,7 +39,7 @@
   "dependencies": {
     "@roqueos-apps/app-sdk": "github:roqueos-apps/app-sdk#v0.2.0",
     "@roqueos-apps/ui": "github:roqueos-apps/ui#v0.6.0",
-    "dompurify": "3.3.1",
+    "dompurify": "3.4.16",
     "marked": "17.0.1"
   },
   "peerDependencies": {
@@ -57,7 +57,7 @@
     "sass": "1.97.1",
     "vite": "7.3.1",
     "vitest": "3.2.4",
-    "vue": "3.5.29",
+    "vue": "3.5.43",
     "vue-eslint-parser": "10.2.0"
   }
 }
