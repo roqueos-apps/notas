@@ -5,6 +5,14 @@ usa [versionamento semântico](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+### Adicionado
+
+- A documentação no padrão da família: `docs/` em inglês (índice, começar, arquitetura,
+  referência, operação, quando quebra, glossário, integrações, modelo de ameaças, testes e
+  decisões) com o par em português em `docs/pt-BR/`, declarados em `docs/docs.json`. O
+  `README.md` e o `CONTRIBUTING.md` passam a ser em inglês, com o par em `README.pt-BR.md` e
+  `docs/pt-BR/CONTRIBUTING.md`.
+
 ## [0.1.2] - 2026-10-08
 
 ### Segurança
