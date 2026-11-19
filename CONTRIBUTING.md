@@ -1,40 +1,24 @@
-# Como contribuir
+# Contributing
 
-Obrigado por querer ajudar. A régua comum da organização está no
-[CONTRIBUTING da roqueos-apps](https://github.com/roqueos-apps/.github/blob/main/CONTRIBUTING.md);
-aqui entra só o que é das Notas.
+_[Português](docs/pt-BR/CONTRIBUTING.md) | English_
 
-1. Abra uma issue antes de mudar o que a pessoa vê ou o que uma nota guarda. Correção pequena
-   pode ir direto para o PR.
-2. Faça o fork, crie um branch e rode `yarn install --ignore-scripts`.
-3. Todo commit leva `Signed-off-by` (`git commit -s`, o DCO). O check `dco` do pull request
-   reprova sem.
-4. Toda correção vem com um teste que reprova sem ela. O que uma ação grava vai em
-   `test/app.spec.js`, chamada por chamada.
-5. **A nota é um post-it da mesa do RoqueOS.** Nunca grave a nota inteira, nem a posição
-   (`x`, `y`), o tamanho (`width`, `height`) ou a camada (`zIndex`) de uma nota que já existe:
-   isso é do post-it. Campo novo é aditivo (o post-it ignora o que não conhece); mudar o nome
-   ou o sentido de um que existe apaga o que a pessoa tinha.
-6. Texto novo entra nos dez `i18n/*.json`, com as mesmas chaves. O `app check` reprova se
-   faltar um idioma.
-7. Rode `yarn verificar` antes de abrir o PR. É o mesmo que o CI roda. `yarn dev` abre as
-   Notas numa janela falsa do RoqueOS, numa conta local.
+Thanks for wanting to help. The organization-wide guide is the [roqueos-apps CONTRIBUTING](https://github.com/roqueos-apps/.github/blob/main/CONTRIBUTING.md); here goes only what belongs to Notes.
 
-Não mude o `id` do `app.json` (`notes`) nem o nome da coleção (`notas`): é por eles que o
-RoqueOS acha as janelas, os atalhos e as notas de quem já usa.
+## How to contribute
 
-O código, os comentários e as mensagens de commit são em português do Brasil. Issue e PR em
-inglês são bem-vindos. Ao participar você concorda com o [código de conduta](CODE_OF_CONDUCT.md).
+1. Open an issue before changing what people see or what a note stores. A small fix can go straight to the pull request.
+2. Fork, create a branch and run `yarn install --ignore-scripts`.
+3. Every commit carries `Signed-off-by` (`git commit -s`, the DCO). The pull request's `dco` check fails without it; `git rebase --signoff main` fixes a branch that missed it.
+4. Every fix comes with a test that fails without it. What an action writes goes into `test/app.spec.js`, call by call.
+5. **A note is a RoqueOS desktop sticky note.** Never write the whole note, nor the position (`x`, `y`), size (`width`, `height`) or layer (`zIndex`) of an existing note: those belong to the sticky note. A new field is additive (the sticky note ignores what it does not know); renaming or changing the meaning of an existing one erases what people had.
+6. New text goes into all ten `i18n/*.json`, with the same keys. `app check` fails if a language is missing one.
+7. Changed a feature or a test cited in `paridade.json`? Update the inventory in the same commit.
+8. Run `yarn verificar` before opening the pull request. It is what CI runs. `yarn dev` opens Notes in a fake RoqueOS window with a local account.
 
----
+Never change the `id` in `app.json` (`notes`) or the collection name (`notas`): RoqueOS finds the windows, shortcuts and notes of people already using it by them.
 
-## Contributing (English)
+## Language
 
-The organization-wide guide is the
-[roqueos-apps CONTRIBUTING](https://github.com/roqueos-apps/.github/blob/main/CONTRIBUTING.md).
-Open an issue before changing what people see or what a note stores; fork, branch,
-`yarn install --ignore-scripts`; sign off every commit (`git commit -s`); every fix comes with
-a test that fails without it. A note is also a RoqueOS desktop sticky note: never write the
-whole note, nor the position, size or layer of an existing one. New text goes into all ten
-`i18n/*.json`; run `yarn verificar` before the pull request. Never change the `id` in
-`app.json` or the collection name.
+Code, comments and commit messages are in Brazilian Portuguese. Issues and pull requests in English are welcome. The documentation is in English in `docs/`, with the Portuguese pair in `docs/pt-BR/`; a change of behavior updates both in the same pull request ([docs/INDEX.md](docs/INDEX.md)).
+
+By taking part you agree to the [code of conduct](CODE_OF_CONDUCT.md).

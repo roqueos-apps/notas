@@ -20,3 +20,5 @@ antes de mudar qualquer coisa.
 - Toda correção vem com teste que reprova sem ela; check novo passa por mutação.
 - Todo commit com `Signed-off-by` (`git commit -s`): o workflow `dco` reprova sem.
 - Português do Brasil no código e nos commits.
+- Documentação: comece por `docs/INDEX.md` (en, o principal) ou `docs/pt-BR/INDEX.md`. Mudança de
+  comportamento muda o documento e o par no mesmo commit; `roqueos-docs` tem de sair `ok`.
